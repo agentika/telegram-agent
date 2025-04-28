@@ -5,7 +5,10 @@ description = ""
 readme = "README.md"
 authors = [{ name = "narumi", email = "toucans-cutouts0f@icloud.com" }]
 requires-python = ">=3.12"
-dependencies = ["loguru>=0.7.3"]
+dependencies = [
+    "openai-agents>=0.0.13",
+    "python-telegram-bot>=22.0",
+]
 
 [project.scripts]
 telegramagent = "telegramagent.cli:main"
