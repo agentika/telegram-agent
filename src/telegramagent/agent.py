@@ -6,6 +6,8 @@ from agents import TResponseInputItem
 from agents.mcp import MCPServerStdio
 
 from .config import Config
+from .model import get_openai_model
+from .model import get_openai_model_settings
 
 
 class OpenAIAgent:
@@ -19,7 +21,11 @@ class OpenAIAgent:
         agent = Agent(
             name=config.name,
             instructions=config.instructions,
-            mcp_servers=[MCPServerStdio(params=params, name=name) for name, params in config.mcp_servers.items()],
+            model=get_openai_model(),
+            model_settings=get_openai_model_settings(),
+            mcp_servers=[
+                MCPServerStdio(params=params.model_dump(), name=name) for name, params in config.mcp_servers.items()
+            ],
         )
         return cls(agent)
 
