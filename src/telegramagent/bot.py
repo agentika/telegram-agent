@@ -45,7 +45,7 @@ class TelegramBot:
         )
         await message.reply_text(output)
 
-    async def __aenter__(self) -> TelegramBot:
+    async def initialize(self) -> None:
         await self.agent.connect()
 
         await self.app.initialize()
@@ -54,9 +54,7 @@ class TelegramBot:
         if self.app.updater:
             await self.app.updater.start_polling(allowed_updates=Update.ALL_TYPES)
 
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb) -> None:
+    async def close(self) -> None:
         if self.app.updater:
             await self.app.updater.stop()
 
@@ -65,6 +63,13 @@ class TelegramBot:
 
         await self.agent.cleanup()
 
-    async def run(self) -> None:
-        while True:
-            await asyncio.sleep(1)
+    async def arun(self) -> None:
+        try:
+            await self.initialize()
+            while True:
+                await asyncio.sleep(1)
+        finally:
+            await self.close()
+
+    def run(self) -> None:
+        asyncio.run(self.arun())

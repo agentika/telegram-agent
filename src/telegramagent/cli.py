@@ -1,4 +1,3 @@
-import asyncio
 from typing import Annotated
 
 import typer
@@ -10,15 +9,11 @@ from .bot import TelegramBot
 from .config import Config
 
 
-async def arun(config_file: str) -> None:
+def run(config_file: Annotated[str, typer.Option("-c", "--config")] = "config.json") -> None:
     config = Config.from_json(config_file)
     agent = OpenAIAgent.from_config(config)
-    async with TelegramBot(agent=agent) as bot:
-        await bot.run()
-
-
-def run(config_file: Annotated[str, typer.Option("-c", "--config")] = "config.json") -> None:
-    asyncio.run(arun(config_file))
+    bot = TelegramBot(agent=agent)
+    bot.run()
 
 
 def main() -> None:
