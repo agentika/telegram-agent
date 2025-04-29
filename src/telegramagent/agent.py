@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from agents import Agent
 from agents import Runner
-from agents import TResponseInputItem
 from agents.mcp import MCPServerStdio
 
+from .cache import get_cache_from_env
 from .config import Config
 from .model import get_openai_model
 from .model import get_openai_model_settings
@@ -14,7 +14,7 @@ class OpenAIAgent:
     def __init__(self, agent: Agent, max_input_items: int | None = None) -> None:
         self.agent = agent
         self.max_input_items = max_input_items
-        self.input_items: list[TResponseInputItem] = []
+        self.cache = get_cache_from_env()
 
     @classmethod
     def from_config(cls, config: Config) -> OpenAIAgent:
@@ -37,8 +37,12 @@ class OpenAIAgent:
         for mcp_server in self.agent.mcp_servers:
             await mcp_server.cleanup()
 
-    async def run(self, text) -> str:
-        self.input_items.append(
+    async def run(self, text, cache_key: str) -> str:
+        input_items = await self.cache.get(cache_key)
+        if input_items is None:
+            input_items = []
+
+        input_items.append(
             {
                 "role": "user",
                 "content": text,
@@ -47,12 +51,12 @@ class OpenAIAgent:
 
         result = await Runner.run(
             starting_agent=self.agent,
-            input=self.input_items,
+            input=input_items,
         )
 
-        self.input_items = result.to_input_list()
-
+        input_items = result.to_input_list()
         if self.max_input_items is not None:
-            self.input_items = self.input_items[-self.max_input_items :]
+            input_items = input_items[-self.max_input_items :]
+        await self.cache.set(cache_key, input_items)
 
         return result.final_output
