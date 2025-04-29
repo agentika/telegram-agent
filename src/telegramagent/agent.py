@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from typing import cast
+
 from agents import Agent
 from agents import Runner
 from agents.mcp import MCPServerStdio
+from agents.mcp import MCPServerStdioParams
 
 from .cache import get_cache_from_env
 from .config import Config
@@ -24,7 +27,8 @@ class OpenAIAgent:
             model=get_openai_model(),
             model_settings=get_openai_model_settings(),
             mcp_servers=[
-                MCPServerStdio(params=params.model_dump(), name=name) for name, params in config.mcp_servers.items()
+                MCPServerStdio(params=cast(MCPServerStdioParams, params.model_dump()), name=name)
+                for name, params in config.mcp_servers.items()
             ],
         )
         return cls(agent)

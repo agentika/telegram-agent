@@ -50,12 +50,16 @@ class TelegramBot:
 
         await self.app.initialize()
         await self.app.start()
-        await self.app.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+
+        if self.app.updater:
+            await self.app.updater.start_polling(allowed_updates=Update.ALL_TYPES)
 
         return self
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
-        await self.app.updater.stop()
+        if self.app.updater:
+            await self.app.updater.stop()
+
         await self.app.stop()
         await self.app.shutdown()
 
