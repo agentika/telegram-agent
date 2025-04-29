@@ -1,5 +1,9 @@
 # Telegram Agent
 
+A simple Telegram bot using the OpenAI Agents SDK with MCP servers.
+
+## Usage
+
 ```sh
 export BOT_TOKEN=
 export OPENAI_API_KEY=
